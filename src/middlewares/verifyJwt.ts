@@ -1,6 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import createHttpError from "http-errors";
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv"
+
+dotenv.config();
 
 export const verifyJwt = async (
   req: Request,
@@ -12,8 +15,8 @@ export const verifyJwt = async (
   console.log(token);
   if (!token) return next(createHttpError.Unauthorized("Access denied"));
   try {
-    const verified = jwt.verify(token, process.env.REFRESH_TOKEN!);
-    req.body.user = verified;
+    const verified = jwt.verify(token, process.env.);
+    req.user = verified;
     next();
   } catch (error) {
     next(

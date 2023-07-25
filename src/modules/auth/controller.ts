@@ -24,7 +24,6 @@ export const register = async (
   } else {
     try {
       const hashedPassword = await bcrypt.hash(password, 10);
-      const otp = generateOtp();
 
       const user = await User.create({
         uid,
