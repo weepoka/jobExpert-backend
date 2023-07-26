@@ -5,6 +5,7 @@ declare global {
       PORT?: string;
       MONGO_URI: string;
       AUTH_TOKEN: string;
+      ACCESS_TOKEN: string;
       REFRESH_TOKEN: string;
       AUTH_TOKEN_EXPIRES_IN: string;
       REFRESH_TOKEN_EXPIRES_IN: string;

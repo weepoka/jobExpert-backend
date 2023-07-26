@@ -15,6 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.verifyJwt = void 0;
 const http_errors_1 = __importDefault(require("http-errors"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 const verifyJwt = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
@@ -23,7 +25,7 @@ const verifyJwt = (req, res, next) => __awaiter(void 0, void 0, void 0, function
         return next(http_errors_1.default.Unauthorized("Access denied"));
     try {
         const verified = jsonwebtoken_1.default.verify(token, process.env.REFRESH_TOKEN);
-        req.body.user = verified;
+        req.user = verified;
         next();
     }
     catch (error) {

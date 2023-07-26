@@ -26,6 +26,11 @@
     "skipLibCheck": true
   },
   "files": ["express.d.ts"],
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "src/**/*.env"],
   "exclude": ["node_modules", "dist"]
+  // "copyFiles": {
+  //   "from": "src",
+  //   "to": "dist",
+  //   "include": ["**/*.json", "**/*.env"]
+  // }
 }

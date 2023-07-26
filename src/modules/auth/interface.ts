@@ -6,7 +6,7 @@ export interface IUser {
   phone: string;
   password: string;
   role?: "Admin" | "Student" | "Teacher";
-  hasEmailVerified?: boolean;
-  hasPhoneVerified?: boolean;
+  hasEmailVerified: boolean;
+  hasPhoneVerified: boolean;
   avatar?: string;
 }

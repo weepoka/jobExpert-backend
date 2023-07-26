@@ -6,6 +6,7 @@ import { createToken } from "utils/token-utils";
 import { generateRandomUID } from "utils/uid-generate";
 import sendMail from "utils/send-email";
 import { generateOtp } from "utils/otp-generate";
+import { Otp } from "modules/otp/otp.model";
 
 //register an user
 export const register = async (
@@ -24,6 +25,7 @@ export const register = async (
   } else {
     try {
       const hashedPassword = await bcrypt.hash(password, 10);
+      const otp = generateOtp();
 
       const user = await User.create({
         uid,
@@ -33,6 +35,10 @@ export const register = async (
         phone,
       });
 
+      const createOtp = await Otp.create({
+        userId: user._id,
+        otp: otp,
+      });
       const userInformation = {
         _id: user._id,
         uid: user.uid,
@@ -42,6 +48,7 @@ export const register = async (
         hasEmailVerified: user.hasEmailVerified,
         hasPhoneVerified: user.hasPhoneVerified,
         role: user.role,
+        createOtp,
       };
 
       //here is the email verification function
@@ -53,8 +60,8 @@ export const register = async (
       //   });
 
       const accessToken = createToken(userInformation, "ACCESS");
-
       const refreshToken = createToken(userInformation, "REFRESH");
+      const otpToken = createToken(userInformation, "OTP");
 
       res.cookie("accessToken", accessToken, {
         httpOnly: true,
@@ -68,6 +75,7 @@ export const register = async (
           user: userInformation,
           accessToken,
           refreshToken,
+          otpToken,
         },
       });
     } catch (error) {

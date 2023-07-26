@@ -15,6 +15,6 @@ export const createToken = (
   }
 
   return jwt.sign(payload, process.env.OTP_TOKEN!, {
-    expiresIn: process.env.OTP_TOKEN_EXPIRES_IN! || "2m",
+    expiresIn: process.env.OTP_TOKEN_EXPIRES_IN! || "1d",
   });
 };
