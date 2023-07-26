@@ -8,9 +8,9 @@ const otpTemplate = (otp, companyName = "Job Expert", companyAddress = "#House 2
       <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">${companyName}</a>
     </div>
     <p style="font-size:1.1em">Hi,</p>
-    <p>Thank you for choosing World of Plastics. Use the following OTP to complete the procedures. OTP is valid for 5 minutes</p>
+    <p>Thank you for choosing ${companyName}. Use the following OTP to complete the procedures. OTP is valid for 2 minutes</p>
     <h2 style="background: #00466a;margin: 0 auto;width: max-content;padding: 0 10px;color: #fff;border-radius: 4px;">${otp}</h2>
-    <p style="font-size:0.9em;">Regards,<br />World of Plastics</p>
+    <p style="font-size:0.9em;">Regards,<br />${companyName}</p>
     <hr style="border:none;border-top:1px solid #eee" />
     <div style="float:right;padding:8px 0;color:#aaa;font-size:0.8em;line-height:1;font-weight:300">
       <p>${companyName}</p>

@@ -12,37 +12,43 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifyOtp = void 0;
+exports.sendOpt = exports.verifyOtp = void 0;
 const http_errors_1 = __importDefault(require("http-errors"));
-const otp_model_1 = require("./otp.model");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const token_utils_1 = require("../../utils/token-utils");
+const otp_generate_1 = require("../../utils/otp-generate");
 const model_1 = require("../../modules/auth/model");
 const dotenv_1 = __importDefault(require("dotenv"));
+const send_email_1 = __importDefault(require("../../utils/send-email"));
+const email_templates_1 = require("../../utils/email-templates");
 dotenv_1.default.config();
 //
 const verifyOtp = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { otp, otpToken } = req.body;
-        const { _id } = req.user;
-        const user = yield model_1.User.findOne({ _id });
-        // const user = await Otp.findOne({userId: _id});
-        const validOtp = yield otp_model_1.Otp.findOne({ userId: _id, otp });
+        const { email, otp, otpToken, otpType } = req.body;
+        const user = yield model_1.User.findOne({ email });
         if (!user) {
-            res.status(404).json({ status: false, message: "User not found" });
+            return res.status(404).json({ status: false, message: "User not found" });
         }
-        if (!validOtp) {
-            res.status(404).json({ status: false, message: "Otp not found" });
+        try {
+            const isOtpValid = jsonwebtoken_1.default.verify(otpToken, process.env.OTP_TOKEN);
+            if (typeof isOtpValid === "string") {
+                return next(http_errors_1.default.Unauthorized("Invalid OTP Token"));
+            }
+            if (isOtpValid.email === email &&
+                isOtpValid.otp === otp &&
+                isOtpValid.otpType === otpType) {
+                user.hasEmailVerified = true;
+                yield user.save();
+                return res.status(200).json({ message: "Otp validation successful" });
+            }
+            else {
+                return res.status(401).json({ message: "Invalid OTP" });
+            }
         }
-        const verifyToken = jsonwebtoken_1.default.verify(otpToken, process.env.OTP_TOKEN);
-        // console.log(process.env.OTP_TOKEN);
-        if (typeof verifyToken === "string") {
-            return next(http_errors_1.default.Unauthorized("Invalid OTP token"));
+        catch (error) {
+            return next(http_errors_1.default.Unauthorized("OTP Expired"));
         }
-        if (user && !user.hasEmailVerified) {
-            user.hasEmailVerified = true;
-            yield user.save();
-        }
-        return res.status(200).json({ message: "Otp validation successful" });
     }
     catch (error) {
         console.log(error);
@@ -50,21 +56,32 @@ const verifyOtp = (req, res, next) => __awaiter(void 0, void 0, void 0, function
     }
 });
 exports.verifyOtp = verifyOtp;
-//send Otp
-// export const sendOpt = async (
-//   req: Request,
-//   res: Response,
-//   next: NextFunction
-// ) => {
-//   try {
-//     const user = req.user;
-//     const otpToken = createToken(user, "OTP");
-//     const otp = generateOtp();
-//     res
-//       .status(200)
-//       .json({ status: true, message: "Otp generated", otp, otpToken });
-//   } catch (error) {
-//     console.log(error);
-//     return next(createHttpError.InternalServerError());
-//   }
-// };
+// send Otp
+const sendOpt = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { email, otpType } = req.body;
+        const user = yield model_1.User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ status: false, message: "User not found" });
+        }
+        const otp = (0, otp_generate_1.generateOtp)().toString();
+        const otpToken = (0, token_utils_1.createToken)({
+            email,
+            otpType,
+            otp,
+        }, "OTP");
+        const emailBody = (0, email_templates_1.otpTemplate)(otp);
+        yield (0, send_email_1.default)({
+            email,
+            subject: "your verification code",
+            message: emailBody,
+            otp,
+        });
+        res.status(200).json({ status: true, message: "Otp generated", otpToken });
+    }
+    catch (error) {
+        console.log(error);
+        return next(http_errors_1.default.InternalServerError());
+    }
+});
+exports.sendOpt = sendOpt;

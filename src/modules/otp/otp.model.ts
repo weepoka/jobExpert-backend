@@ -1,15 +1,34 @@
 import { Schema, model } from "mongoose";
 import { IOtp } from "./otp.interface";
 
-const otpSchema = new Schema<IOtp>({
-  userId: {
-    type: Schema.Types.ObjectId,
-    required: true,
+const otpSchema = new Schema<IOtp>(
+  {
+    email: {
+      type: String,
+      required: true,
+    },
+    otp: {
+      type: String,
+      required: true,
+    },
+    otpToken: {
+      type: String,
+      required: true,
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+      expires: "2m",
+    },
+    otpType: {
+      type: String,
+      enum: ["REGISTER", "RESET_PASSWORD"],
+      default: "REGISTER",
+    },
   },
-  otp: {
-    type: String,
-    required: true,
-  },
-});
+  {
+    timestamps: true,
+  }
+);
 
 export const Otp = model<IOtp>("otps", otpSchema);

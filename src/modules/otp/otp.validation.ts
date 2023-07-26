@@ -2,10 +2,9 @@ import { Joi, validate } from "express-validation";
 
 const otpValidation = {
   body: Joi.object({
-    userId: Joi.string()
-      .pattern(/^[0-9a-fA-F]{24}$/)
-      .required(),
     otp: Joi.string().required(),
+    otpType: Joi.string().valid("REGISTER", "RESET_PASSWORD").required(),
+    otpToken: Joi.string().required(),
   }),
 };
 

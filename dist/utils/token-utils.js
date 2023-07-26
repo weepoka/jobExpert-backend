@@ -17,7 +17,7 @@ const createToken = (payload, keyType) => {
         });
     }
     return jsonwebtoken_1.default.sign(payload, process.env.OTP_TOKEN, {
-        expiresIn: process.env.OTP_TOKEN_EXPIRES_IN || "1d",
+        expiresIn: process.env.OTP_TOKEN_EXPIRES_IN || "2m",
     });
 };
 exports.createToken = createToken;

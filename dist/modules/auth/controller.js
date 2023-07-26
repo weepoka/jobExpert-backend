@@ -18,8 +18,6 @@ const http_errors_1 = __importDefault(require("http-errors"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const token_utils_1 = require("../../utils/token-utils");
 const uid_generate_1 = require("../../utils/uid-generate");
-const otp_generate_1 = require("../../utils/otp-generate");
-const otp_model_1 = require("../../modules/otp/otp.model");
 //register an user
 const register = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, email, phone, password } = req.body;
@@ -31,17 +29,12 @@ const register = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
     else {
         try {
             const hashedPassword = yield bcrypt_1.default.hash(password, 10);
-            const otp = (0, otp_generate_1.generateOtp)();
             const user = yield model_1.User.create({
                 uid,
                 name,
                 email,
                 password: hashedPassword,
                 phone,
-            });
-            const createOtp = yield otp_model_1.Otp.create({
-                userId: user._id,
-                otp: otp,
             });
             const userInformation = {
                 _id: user._id,
@@ -52,7 +45,6 @@ const register = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
                 hasEmailVerified: user.hasEmailVerified,
                 hasPhoneVerified: user.hasPhoneVerified,
                 role: user.role,
-                createOtp,
             };
             //here is the email verification function
             //   await sendMail({
@@ -62,7 +54,6 @@ const register = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
             //   });
             const accessToken = (0, token_utils_1.createToken)(userInformation, "ACCESS");
             const refreshToken = (0, token_utils_1.createToken)(userInformation, "REFRESH");
-            const otpToken = (0, token_utils_1.createToken)(userInformation, "OTP");
             res.cookie("accessToken", accessToken, {
                 httpOnly: true,
                 path: "/",
@@ -74,7 +65,6 @@ const register = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
                     user: userInformation,
                     accessToken,
                     refreshToken,
-                    otpToken,
                 },
             });
         }
