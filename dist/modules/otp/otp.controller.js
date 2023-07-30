@@ -75,7 +75,6 @@ const sendOpt = (req, res, next) => __awaiter(void 0, void 0, void 0, function* 
             email,
             subject: "your verification code",
             message: emailBody,
-            otp,
         });
         res.status(200).json({ status: true, message: "Otp generated", otpToken });
     }
