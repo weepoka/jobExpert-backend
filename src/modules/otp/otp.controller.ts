@@ -80,7 +80,6 @@ export const sendOpt = async (
       email,
       subject: "your verification code",
       message: emailBody,
-      otp,
     });
     res.status(200).json({ status: true, message: "Otp generated", otpToken });
   } catch (error) {
