@@ -9,4 +9,12 @@ export interface IUser {
   hasEmailVerified: boolean;
   hasPhoneVerified: boolean;
   avatar?: string;
+  examResults: {
+    examId: string;
+    examTitle: string;
+    startTime: Date;
+    endTime: Date;
+    examAnswers: { questionId: string; selectedOptionId: string }[];
+    examScore?: number;
+  }[];
 }
