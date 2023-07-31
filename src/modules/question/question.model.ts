@@ -9,14 +9,14 @@ const questionSchema = new Schema<IQuestion>({
   options: [
     {
       type: Schema.Types.ObjectId,
-      ref: "Option",
+      ref: "options",
       required: true,
     },
   ],
   correctOption: [
     {
       type: Schema.Types.ObjectId,
-      ref: "Option",
+      ref: "options",
       required: true,
     },
   ],

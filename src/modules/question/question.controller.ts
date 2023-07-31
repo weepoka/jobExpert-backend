@@ -14,26 +14,29 @@ export const createQuestion = async (
     const questionData: IQuestion = req.body;
 
     const savedOptions = await Promise.all(
-      questionData.options.map(async (optionData) => {
-        const option = new OptionModel(optionData);
+      questionData.options.map(async (optionText) => {
+        // Change 'optionData' to 'optionText'
+        const option = new OptionModel({ optionText }); // Create an object with 'optionText' property
         return await option.save();
       })
     );
     const optionIds: string[] = savedOptions.map((option) => option._id);
     questionData.options = optionIds;
     questionData.correctOption =
-      optionIds[parseInt(questionData.correctOption)];
+      optionIds[parseInt(questionData.correctOption) - 1];
 
     const question = new QuestionModel(questionData);
     await question.save();
 
     res.status(201).json(question);
   } catch (error) {
+    console.error("Question create error:", error);
     res
       .status(500)
-      .json({ status: false, message: "question create failed", error });
+      .json({ status: false, message: "Question create failed", error });
   }
 };
+
 // get all questions
 export const getAllQuestions = async (
   req: Request,
@@ -41,12 +44,15 @@ export const getAllQuestions = async (
   next: NextFunction
 ) => {
   try {
-    const questions = await QuestionModel.find();
-    res.status(201).json(questions);
+    const questions = await QuestionModel.find()
+      .populate("options")
+      .populate("correctOption");
+    res.status(200).json(questions);
   } catch (error) {
+    console.log(error);
     res
       .status(500)
-      .json({ status: false, message: "failed to fetch questions", error });
+      .json({ status: false, message: "Failed to fetch questions", error });
   }
 };
 
