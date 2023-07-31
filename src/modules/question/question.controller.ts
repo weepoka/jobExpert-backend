@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { IQuestion } from "./question.interface";
 import { QuestionModel } from "./question.model";
+import { OptionModel } from "modules/option/option.model";
+import { IOption } from "modules/option/option.interface";
 
 //create a new question
 export const createQuestion = async (
@@ -10,8 +12,21 @@ export const createQuestion = async (
 ) => {
   try {
     const questionData: IQuestion = req.body;
+
+    const savedOptions = await Promise.all(
+      questionData.options.map(async (optionData) => {
+        const option = new OptionModel(optionData);
+        return await option.save();
+      })
+    );
+    const optionIds: string[] = savedOptions.map((option) => option._id);
+    questionData.options = optionIds;
+    questionData.correctOption =
+      optionIds[parseInt(questionData.correctOption)];
+
     const question = new QuestionModel(questionData);
     await question.save();
+
     res.status(201).json(question);
   } catch (error) {
     res
