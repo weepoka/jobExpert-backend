@@ -20,6 +20,11 @@ const questionSchema = new Schema<IQuestion>({
       required: true,
     },
   ],
+  category: {
+    type: Schema.Types.ObjectId,
+    ref: "category",
+    required: true,
+  },
 });
 
 export const QuestionModel = model<IQuestion>("questions", questionSchema);

@@ -3,6 +3,7 @@ import { IQuestion } from "./question.interface";
 import { QuestionModel } from "./question.model";
 import { OptionModel } from "modules/option/option.model";
 import { IOption } from "modules/option/option.interface";
+import { CategoryModel } from "modules/category/category.model";
 
 //create a new question
 export const createQuestion = async (
@@ -15,8 +16,7 @@ export const createQuestion = async (
 
     const savedOptions = await Promise.all(
       questionData.options.map(async (optionText) => {
-        // Change 'optionData' to 'optionText'
-        const option = new OptionModel({ optionText }); // Create an object with 'optionText' property
+        const option = new OptionModel({ optionText });
         return await option.save();
       })
     );
@@ -24,6 +24,18 @@ export const createQuestion = async (
     questionData.options = optionIds;
     questionData.correctOption =
       optionIds[parseInt(questionData.correctOption) - 1];
+
+    // Find the category by ID
+    const categoryId = req.body.categoryId;
+    const category = await CategoryModel.findById(categoryId);
+    if (!category) {
+      return res
+        .status(404)
+        .json({ status: false, message: "Category not found" });
+    }
+
+    // Associate the category with the question
+    questionData.category = category._id;
 
     const question = new QuestionModel(questionData);
     await question.save();
