@@ -9,7 +9,7 @@ export const createOptionsForQuestion = async (
 ) => {
   try {
     const optionsData: {
-      text: string;
+      optionText: string;
       isCorrect: boolean;
       question: string;
     }[] = req.body.optionsData;
@@ -18,7 +18,7 @@ export const createOptionsForQuestion = async (
 
     for (const optionData of optionsData) {
       const newOption = new OptionModel({
-        text: optionData.text,
+        optionText: optionData.optionText,
         isCorrect: optionData.isCorrect,
         question: optionData.question,
       });

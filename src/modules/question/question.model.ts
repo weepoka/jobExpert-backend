@@ -13,4 +13,4 @@ const questionSchema = new Schema<IQuestion>({
   multipleCorrectAnswers: { type: Boolean, required: true },
 });
 
-export const QuestionModel = model<IQuestion>("questions", questionSchema);
+export const QuestionModel = model<IQuestion>("Question", questionSchema);
