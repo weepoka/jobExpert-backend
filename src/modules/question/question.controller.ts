@@ -1,130 +1,61 @@
 import { NextFunction, Request, Response } from "express";
 import { IQuestion } from "./question.interface";
 import { QuestionModel } from "./question.model";
+import { CategoryModel } from "modules/category/category.model";
+import { createOptionsForQuestion } from "modules/option/option.controller";
 import { OptionModel } from "modules/option/option.model";
 import { IOption } from "modules/option/option.interface";
-import { CategoryModel } from "modules/category/category.model";
-
-//create a new question
-export const createQuestion = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const questionData: IQuestion = req.body;
-
-    const savedOptions = await Promise.all(
-      questionData.options.map(async (optionText) => {
-        const option = new OptionModel({ optionText });
-        return await option.save();
-      })
-    );
-    const optionIds: string[] = savedOptions.map((option) => option._id);
-    questionData.options = optionIds;
-    questionData.correctOption =
-      optionIds[parseInt(questionData.correctOption) - 1];
-
-    // Find the category by ID
-    const categoryId = req.body.categoryId;
-    const category = await CategoryModel.findById(categoryId);
-    if (!category) {
-      return res
-        .status(404)
-        .json({ status: false, message: "Category not found" });
-    }
-
-    // Associate the category with the question
-    questionData.category = category._id;
-
-    const question = new QuestionModel(questionData);
-    await question.save();
-
-    res.status(201).json(question);
-  } catch (error) {
-    console.error("Question create error:", error);
-    res
-      .status(500)
-      .json({ status: false, message: "Question create failed", error });
-  }
-};
-
-// get all questions
-export const getAllQuestions = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const questions = await QuestionModel.find()
-      .populate("options")
-      .populate("correctOption");
-    res.status(200).json(questions);
-  } catch (error) {
-    console.log(error);
-    res
-      .status(500)
-      .json({ status: false, message: "Failed to fetch questions", error });
-  }
-};
-
-//get specific questions
-
-export const getQuestionById = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const questionId = req.params.id;
-    const question = await QuestionModel.findById(questionId);
-    if (!question) {
-      return res.status(404).json({ message: "Question not found" });
-    }
-    res.json(question);
-  } catch (error) {
-    res.status(500).json({
-      status: false,
-      message: "failed to get the specific question",
-      error,
-    });
-  }
-};
-
-//update a question
-export const updateQuestion = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const questionId = req.params.id;
-    const updatedQuestionData: IQuestion = req.body;
-    const updatedQuestion = await QuestionModel.findByIdAndUpdate(
-      questionId,
-      updatedQuestionData,
-      { new: true }
-    );
-    if (!updatedQuestion) {
-      return res.status(404).json({ message: "Question not found" });
-    }
-    res.json(updatedQuestion);
-  } catch (error) {
-    res.status(500).json({ status: false, message: "Failed to update", error });
-  }
-};
-
-//delete an existing question
 
 export const name = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const questionId = req.params.id;
-    const deletedQuestion = await QuestionModel.findByIdAndDelete(questionId);
-    if (!deletedQuestion) {
-      return res.status(404).json({ message: "Question not found" });
+    const { teacherId, title, categoryName, questions } = req.body;
+
+    const createdQuestions: IQuestion[] = [];
+
+    for (const q of questions) {
+      const { question, options, multipleCorrectAnswers } = q;
+
+      if (options.length < 5 || options.length > 200) {
+        return res
+          .status(400)
+          .json({ error: "Number of options should be between 5 and 200" });
+      }
+
+      const optionPromises = options.map((option: IOption) => {
+        return OptionModel.create({
+          optionText: option.optionText,
+          isCorrect: option.isCorrect,
+          question: newQuestion,
+        });
+      });
+
+      const createdOptions = await Promise.all(optionPromises);
+      const optionIds = createdOptions.map((option) => option._id);
+
+      // Check if the category already exists or create a new one
+      const category = await CategoryModel.findOne({ name: categoryName });
+      if (!category) {
+        const newCategory = await CategoryModel.create({
+          name: categoryName,
+        });
+      }
+      const newQuestion = new QuestionModel({
+        teacherId,
+        title,
+        category: category?._id,
+        question,
+        options: optionIds,
+        multipleCorrectAnswers,
+      });
+
+      await newQuestion.save();
+      createdQuestions.push(newQuestion);
     }
-    res.json(deletedQuestion);
+
+    res.status(201).json({ status: true, data: createdQuestions });
   } catch (error) {
-    res.status(500).json({ status: false, message: "", error });
+    res
+      .status(500)
+      .json({ status: false, message: "failed to create question", error });
   }
 };

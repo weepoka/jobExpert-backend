@@ -6,6 +6,17 @@ const optionSchema = new Schema<IOption>({
     type: String,
     required: true,
   },
+  isCorrect: {
+    type: Boolean,
+    required: true,
+  },
+  question: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Question",
+      required: true,
+    },
+  ],
 });
 
-export const OptionModel = model<IOption>("options", optionSchema);
+export const OptionModel = model<IOption>("Option", optionSchema);
