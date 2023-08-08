@@ -38,10 +38,12 @@ export const createQuestion = async (
       const createdOptions = await Promise.all(optionPromises);
       const optionIds = createdOptions.map((option) => option._id);
 
-      let category = await CategoryModel.findOne({ name: categoryName });
+      let category = await CategoryModel.findOne({
+        categoryName: categoryName,
+      });
       if (!category) {
         category = await CategoryModel.create({
-          name: categoryName,
+          categoryName: categoryName,
         });
       }
       const newQuestion = new QuestionModel({
@@ -63,5 +65,35 @@ export const createQuestion = async (
     res
       .status(500)
       .json({ status: false, message: "failed to create question", error });
+  }
+};
+
+//get all questions by category
+
+export const getQuestionByCategory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { category } = req.params;
+
+    const findCategory = await CategoryModel.findOne({
+      categoryName: { $regex: new RegExp(`^${category}$`, "i") },
+    });
+    if (!findCategory) {
+      return res
+        .status(404)
+        .json({ status: false, message: "No such category found" });
+    }
+    const questions = await QuestionModel.find({
+      category: findCategory._id,
+    })
+      .populate("options")
+      .populate("category");
+
+    res.status(201).json({ status: true, data: questions });
+  } catch (error) {
+    res.status(500).json({ status: false, message: "Failed to fetch", error });
   }
 };

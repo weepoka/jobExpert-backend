@@ -5,8 +5,8 @@ export interface IQuestion {
   _id?: string;
   teacherId: string;
   title: string;
-  category: string; // Refers to the Category's _id
+  category: Types.ObjectId; // Refers to the Category's _id
   question: string;
-  options: IOption["_id"][];
+  options: Types.ObjectId[];
   multipleCorrectAnswers: boolean;
 }

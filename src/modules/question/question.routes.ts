@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createQuestion } from "./question.controller";
+import { createQuestion, getQuestionByCategory } from "./question.controller";
 import { validateQuestion } from "./question.validation";
 
 const router = Router();
@@ -9,5 +9,6 @@ router.post(
   //  validateQuestion,
   createQuestion
 );
+router.get("/by-category/:category", getQuestionByCategory);
 
 export default router;
