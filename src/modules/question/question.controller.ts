@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from "express";
 import { IQuestion } from "./question.interface";
 import { QuestionModel } from "./question.model";
 import { CategoryModel } from "modules/category/category.model";
-import { createOptionsForQuestion } from "modules/option/option.controller";
 import { OptionModel } from "modules/option/option.model";
 import { IOption } from "modules/option/option.interface";
 
