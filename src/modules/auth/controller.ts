@@ -61,8 +61,7 @@ export const register = async (
         httpOnly: true,
         path: "/",
       });
-
-      return res.status(201).json({
+      res.status(201).json({
         status: true,
         message: "Success",
         data: {
@@ -71,6 +70,7 @@ export const register = async (
           refreshToken,
         },
       });
+      next();
     } catch (error) {
       console.log(error);
       return next(createHttpError.InternalServerError());

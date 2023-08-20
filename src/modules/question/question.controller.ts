@@ -14,7 +14,6 @@ export const createQuestion = async (
     const { teacherId, title, categoryName, questions } = req.body;
 
     const createdQuestions: IQuestion[] = [];
-
     // console.log(req.body);
     for (const q of questions) {
       const { question, options, multipleCorrectAnswers } = q;
